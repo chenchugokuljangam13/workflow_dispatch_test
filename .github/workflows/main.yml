@@ -21,39 +21,12 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      # # don't push this to repo its not needed git hub vm contains awscli in-built
-      # - name: Install AWS CLI (for local act testing)
-      #   run: |
-      #     sudo apt-get update && sudo apt-get install -y awscli
-
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
-      
-      - name: Download file from S3
-        run: |
-          aws s3 cp s3://work-flow-bucket-3/post_hidden.test.js tests/test-case-private.test.js
       
       - name: Install dependencies
         run: npm i
+      
+      - name: Run test cases
+        run: npm run unit
 
-      - name: Make script executable
-        run: chmod +x scripts/run-tests.sh
-
-      - name: Run tests with minimal output
-        run: scripts/run-tests.sh
-        continue-on-error: true
-
-      - name: Show Test Summary (Passed/Failed/Total)
-        run: |
-          echo "Test Summary:"
-          cat ./results.json | jq '{
-            passed: .numPassedTests,
-            failed: .numFailedTests,
-            total: .numTotalTests
-          }'
+      
         
