@@ -1,9 +1,8 @@
 # name: CI
-# on:
-#   pull_request:
-#     types: [edited, opened, reopened, synchronize]
-# for testing i will use this workflows on push action
 on:
+  pull_request:
+    types: [edited, opened, reopened, synchronize]
+# for testing i will use this workflows on push action
   push:
     branches:
       - main
