@@ -45,6 +45,8 @@ jobs:
             failed: .numFailedTests,
             total: .numTotalTests
           }'
+      - name: Make script executable
+        run: chmod +x scripts/update-results.sh
       - name: Upload results to Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
