@@ -4,7 +4,7 @@ set -e
 
 echo "Extracting test history from results.json..."
 
-testHistory=$(jq '[.testResults[0].assertionResults[] | {testName: .title, testStatus: .status}]' results.json)
+testHistory=$(jq '[.testResults[].assertionResults[] | {testName: .title, testStatus: .status}]' results.json)
 numPassed=$(jq '.numPassedTests' results.json)
 numTotal=$(jq '.numTotalTests' results.json)
 # echo "Formatted Test History: $testHistory"
