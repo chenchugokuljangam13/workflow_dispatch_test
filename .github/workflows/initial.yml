@@ -58,7 +58,7 @@ jobs:
         run: npm run unit
 
       - name: Get PR info and send to Supabase
-        if: github.event_name == 'pull_request'
+        # if: github.event_name == 'pull_request'
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
