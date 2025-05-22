@@ -34,6 +34,7 @@ on:
   pull_request:
     types: [edited, opened, reopened, synchronize]
 
+
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
@@ -74,7 +75,7 @@ jobs:
           echo "PR Title: $PR_TITLE"
           echo "Commit SHA: $PR_COMMIT"
 
-          RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.5566b5a9-87e5-468f-bc38-5823b57496e8" \
+          RESPONSE=$(curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.5566b5a9-87e5-468f-bc38-5823b57496e8" \
             -H "apikey: $SUPABASE_KEY" \
             -H "Authorization: Bearer $SUPABASE_KEY" \
             -H "Content-Type: application/json" \
