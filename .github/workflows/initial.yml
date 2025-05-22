@@ -1,16 +1,46 @@
-# name: CI
+# # name: CI
+# on:
+#   pull_request:
+#     types: [edited, opened, reopened, synchronize]
+# # for testing i will use this workflows on push action
+#   push:
+#     branches:
+#       - main
+
+# jobs:
+#   build-and-test:
+
+#     runs-on: ubuntu-latest
+#     steps:
+#       - uses: actions/checkout@v4
+#         with:
+#           fetch-depth: 0
+
+#       - name: Use Node.js
+#         uses: actions/setup-node@v4
+#         with:
+#           node-version: '18.x'
+      
+#       - name: Install dependencies
+#         run: npm i
+      
+#       - name: Run test cases
+#         run: npm run unit
+
+      
+name: CI
+
 on:
   pull_request:
     types: [edited, opened, reopened, synchronize]
-# for testing i will use this workflows on push action
   push:
     branches:
       - main
 
 jobs:
   build-and-test:
-
     runs-on: ubuntu-latest
+
     steps:
       - uses: actions/checkout@v4
         with:
@@ -20,12 +50,39 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      
+
       - name: Install dependencies
         run: npm i
-      
+
       - name: Run test cases
         run: npm run unit
 
-      
-        
+      - name: Get PR info and send to Supabase
+        if: github.event_name == 'pull_request'
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+        run: |
+          PR_NUMBER=${{ github.event.number }}
+          echo "Fetching PR details for #$PR_NUMBER"
+
+          # Fetch PR details using GitHub API
+          PR_DATA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
+            https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER)
+
+          PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
+          PR_COMMIT=$(echo "$PR_DATA" | jq -r '.head.sha')
+
+          echo "PR Title: $PR_TITLE"
+          echo "Commit SHA: $PR_COMMIT"
+
+          # Send to Supabase (example using curl; adjust URL and payload)
+          curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.5566b5a9-87e5-468f-bc38-5823b57496e8" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
+            -H "Content-Type: application/json" \
+            -d '{
+              "pr_name": "'"$PR_TITLE"'",
+              "sha": "'"$PR_COMMIT"'"
+            }'
