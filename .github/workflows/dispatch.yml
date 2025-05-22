@@ -28,37 +28,7 @@ jobs:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_KEY }}
           REPO_NAME: ${{ github.event.repository.name }}
-        run: |
-          node -e "
-          const { createClient } = require('@supabase/supabase-js');
-          const { execSync } = require('child_process');
-          const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
-
-          (async () => {
-           const { data, error } = await supabase
-            .from('assessments')           
-            .select('*')                
-            .eq('name', 'chat-app-using-aws'); 
- 
-            if (error) {
-              console.error(' Supabase error:', error);
-              process.exit(1);
-            }
-            if (!data || data.length === 0) {
-              console.error('No rows returned from Supabase.');
-              process.exit(1);
-            }
-            const url = data[0]?.hidden_test_cases_link;
-            if (!url) {
-              console.error(' No S3 URL found.');
-              process.exit(1);
-            }
-
-            // Removed console.log to hide S3 URL
-            execSync(\`curl -f -o tests/test-case-private.test.js \"\${url}\"\`, { stdio: 'inherit' });
-          })();
-          "
-
+        run: ./scripts/fetch-hidden-tests.sh
       - name: Make script executable
         run: chmod +x scripts/run-tests.sh
 
