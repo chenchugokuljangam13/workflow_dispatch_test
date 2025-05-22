@@ -77,12 +77,17 @@ jobs:
           echo "PR Title: $PR_TITLE"
           echo "Commit SHA: $PR_COMMIT"
 
-          # Send to Supabase (example using curl; adjust URL and payload)
-          curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.5566b5a9-87e5-468f-bc38-5823b57496e8" \
+          RESPONSE=$(curl -s -w "\n%{http_code}" -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.5566b5a9-87e5-468f-bc38-5823b57496e8" \
             -H "apikey: $SUPABASE_KEY" \
             -H "Authorization: Bearer $SUPABASE_KEY" \
             -H "Content-Type: application/json" \
             -d '{
               "pr_name": "'"$PR_TITLE"'",
               "sha": "'"$PR_COMMIT"'"
-            }'
+            }')
+
+          BODY=$(echo "$RESPONSE" | head -n1)
+          STATUS=$(echo "$RESPONSE" | tail -n1)
+
+          echo "Response body: $BODY"
+          echo "HTTP status: $STATUS"
