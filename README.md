@@ -16,7 +16,7 @@
   yarn dev
   ```
 
-sklfsdf
+Ust Raising a PR
 
 # Getting Started (Docker)
 
