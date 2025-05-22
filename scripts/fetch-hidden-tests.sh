@@ -10,7 +10,7 @@ const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SER
   const { data, error } = await supabase
     .from('assessments')           
     .select('*')                
-    .eq('id', '1db1d95a-2600-4311-be3a-b5dcef26fb78');
+    .eq('name',process.env.REPO_NAME );
   if (error) {
     console.error('Supabase error:', error);
     process.exit(1);
