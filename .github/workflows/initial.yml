@@ -33,7 +33,7 @@ name: CI
 on:
   pull_request:
     types: [edited, opened, reopened, synchronize]
-
+    branches: [ "main" ]
 
 jobs:
   build-and-test:
@@ -54,16 +54,26 @@ jobs:
 
       - name: Run test cases
         run: npm run unit
+      - name: Check secrets
+        run: |
+          if [ -z "${{ secrets.SUPABASE_URL }}" ]; then
+            echo "SUPABASE_URL is NOT set"
+          else
+            echo "SUPABASE_URL is set"
+          fi
 
       - name: Get PR info and send to Supabase
         if: github.event_name == 'pull_request'
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
         run: |
-          echo "SUPABASE_URL is: '${{ secrets.SUPABASE_URL }}'"
+          echo "SUPABASE_URL is: '${SUPABASE_URL}'"
           PR_TITLE="${{ github.event.pull_request.title }}"
           COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
           ID="5566b5a9-87e5-468f-bc38-5823b57496e8"
-          curl -X PATCH "https://${{ secrets.SUPABASE_URL }}/rest/v1/candidate_assessment?id=eq.${ID}" \
-            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
-            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
+          curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.${ID}" \
+            -H "apikey: $SUPABASE_KEY" \
+            -H "Authorization: Bearer $SUPABASE_KEY" \
             -H "Content-Type: application/json" \
             -d "{\"pr_name\": \"${PR_TITLE}\", \"sha\": \"${COMMIT_SHA}\"}"
