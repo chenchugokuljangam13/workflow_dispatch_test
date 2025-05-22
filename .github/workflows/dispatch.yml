@@ -13,23 +13,23 @@ jobs:
         uses: actions/setup-node@v4
         with:
           node-version: '18.x'
-      # # don't push this to repo its not needed git hub vm contains awscli in-built
-      # - name: Install AWS CLI (for local act testing)
-      #   run: |
-      #     sudo apt-get update && sudo apt-get install -y awscli
 
       - name: Install dependencies
         run: npm i
+
       - name: Install Supabase JS client
         run: npm install @supabase/supabase-js
+
       - name: Make fetch script executable
         run: chmod +x scripts/fetch-hidden-tests.sh
+
       - name: Fetch S3 URL and download hidden test
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_KEY }}
           REPO_NAME: ${{ github.event.repository.name }}
         run: ./scripts/fetch-hidden-tests.sh
+        
       - name: Make script executable
         run: chmod +x scripts/run-tests.sh
 
