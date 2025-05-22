@@ -18,20 +18,43 @@ jobs:
       #   run: |
       #     sudo apt-get update && sudo apt-get install -y awscli
 
-      - name: Configure AWS credentials
-        uses: aws-actions/configure-aws-credentials@v3
-        with:
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-session-token: ${{ secrets.AWS_SESSION_TOKEN }}
-          aws-region: us-east-1
-      
-      - name: Download file from S3
-        run: |
-          aws s3 cp s3://work-flow-bucket-3/post_hidden.test.js tests/test-case-private.test.js
-      
       - name: Install dependencies
         run: npm i
+      - name: Install Supabase JS client
+        run: npm install @supabase/supabase-js
+
+      - name: Fetch S3 URL and download hidden test
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_SERVICE_ROLE_KEY }}
+          REPO_NAME: ${{ github.event.repository.name }}
+        run: |
+          node -e "
+          const { createClient } = require('@supabase/supabase-js');
+          const { execSync } = require('child_process');
+          const supabase = createClient(process.env.SUPABASE_URL, process.env.SUPABASE_SERVICE_ROLE_KEY);
+
+          (async () => {
+           const { data, error } = await supabase
+            .from('assessments')           
+            .select('*')                
+            .eq('name', process.env.REPO_NAME); 
+ 
+            if (error) {
+              console.error(' Supabase error:', error);
+              process.exit(1);
+            }
+
+            const url = data[0]?.hidden_test_cases_link;
+            if (!url) {
+              console.error(' No S3 URL found.');
+              process.exit(1);
+            }
+
+            // Removed console.log to hide S3 URL
+            execSync(\`curl -f -o tests/test-case-private.test.js \"\${url}\"\`, { stdio: 'inherit' });
+          })();
+          "
 
       - name: Make script executable
         run: chmod +x scripts/run-tests.sh
