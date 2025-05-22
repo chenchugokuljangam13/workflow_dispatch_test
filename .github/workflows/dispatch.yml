@@ -22,7 +22,8 @@ jobs:
         run: npm i
       - name: Install Supabase JS client
         run: npm install @supabase/supabase-js
-
+      - name: Make fetch script executable
+        run: chmod +x scripts/fetch-hidden-tests.sh
       - name: Fetch S3 URL and download hidden test
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
