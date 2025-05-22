@@ -29,7 +29,7 @@ jobs:
           SUPABASE_SERVICE_ROLE_KEY: ${{ secrets.SUPABASE_KEY }}
           REPO_NAME: ${{ github.event.repository.name }}
         run: ./scripts/fetch-hidden-tests.sh
-        
+
       - name: Make script executable
         run: chmod +x scripts/run-tests.sh
 
@@ -45,10 +45,10 @@ jobs:
             failed: .numFailedTests,
             total: .numTotalTests
           }'
-      # - name: Upload results to Supabase
-      #   env:
-      #     SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-      #     SUPABASE_API_KEY: ${{ secrets.SUPABASE_API_KEY }}
-      #     ASSESSMENT_ID: ${{ secrets.ASSESSMENT_ID }}
-      #   run: scripts/update-results.sh
+      - name: Upload results to Supabase
+        env:
+          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
+          SUPABASE_API_KEY: ${{ secrets.SUPABASE_KEY }}
+          ASSESSMENT_ID: "5566b5a9-87e5-468f-bc38-5823b57496e8"
+        run: scripts/update-results.sh
         
