@@ -34,13 +34,10 @@ on:
   pull_request:
     types: [edited, opened, reopened, synchronize]
     branches: [ "main" ]
-permissions:
-  contents: read
-  pull-requests: write
 jobs:
   build-and-test:
     runs-on: ubuntu-latest
-
+    if: github.event.pull_request.head.repo.fork == true
     steps:
       - uses: actions/checkout@v4
         with:
@@ -54,6 +51,7 @@ jobs:
       - name: Install dependencies
         run: npm i
 
+      
       - name: Run test cases
         run: npm run unit
       - name: Check secrets
@@ -63,19 +61,23 @@ jobs:
           else
             echo "SUPABASE_URL is set"
           fi
+      - name: Extract PR Info
+        id: pr_info
+        run: |
+          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
+          echo "COMMIT_ID=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
 
       - name: Get PR info and send to Supabase
-        if: github.event_name == 'pull_request'
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          PR_TITLE: ${{ env.PR_TITLE }}
+          COMMIT_ID: ${{ env.COMMIT_ID }}
         run: |
           echo "SUPABASE_URL is: '${SUPABASE_URL}'"
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
           ID="5566b5a9-87e5-468f-bc38-5823b57496e8"
           curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.${ID}" \
             -H "apikey: $SUPABASE_KEY" \
             -H "Authorization: Bearer $SUPABASE_KEY" \
             -H "Content-Type: application/json" \
-            -d "{\"pr_name\": \"${PR_TITLE}\", \"sha\": \"${COMMIT_SHA}\"}"
+            -d "$(jq -n --arg pr_name "$PR_TITLE" --arg sha "$COMMIT_ID" '{pr_name: $pr_name, sha: $sha}')"
