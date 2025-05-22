@@ -57,33 +57,12 @@ jobs:
 
       - name: Get PR info and send to Supabase
         if: github.event_name == 'pull_request'
-        env:
-          SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
-          SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          PR_NUMBER=${{ github.event.number }}
-          echo "Supabase KEY is set: ${#SUPABASE_KEY}"
-          echo "Supabase url is set: ${#SUPABASE_URL}"
-          echo "Fetching PR details for #$PR_NUMBER"
-
-          # Fetch PR details using GitHub API
-          PR_DATA=$(curl -s -H "Authorization: token $GITHUB_TOKEN" \
-            https://api.github.com/repos/${{ github.repository }}/pulls/$PR_NUMBER)
-
-          PR_TITLE=$(echo "$PR_DATA" | jq -r '.title')
-          PR_COMMIT=$(echo "$PR_DATA" | jq -r '.head.sha')
-
-          echo "PR Title: $PR_TITLE"
-          echo "Commit SHA: $PR_COMMIT"
-          curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.5566b5a9-87e5-468f-bc38-5823b57496e8" \
-            -H "apikey: $SUPABASE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_KEY" \
+          PR_TITLE="${{ github.event.pull_request.title }}"
+          COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
+          ID="5566b5a9-87e5-468f-bc38-5823b57496e8"
+          curl -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/candidate_assessment?id=eq.${ID}" \
+            -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
+            -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
             -H "Content-Type: application/json" \
-            -d '{
-              "pr_name": "'"$PR_TITLE"'",
-              "sha": "'"$PR_COMMIT"'"
-            }'
-
-
-          echo "Response body"
+            -d "{\"pr_name\": \"${PR_TITLE}\", \"sha\": \"${COMMIT_SHA}\"}"
