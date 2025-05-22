@@ -58,12 +58,13 @@ jobs:
       - name: Get PR info and send to Supabase
         if: github.event_name == 'pull_request'
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
           SUPABASE_KEY: ${{ secrets.SUPABASE_KEY }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           PR_NUMBER=${{ github.event.number }}
           echo "Supabase KEY is set: ${#SUPABASE_KEY}"
+          echo "Supabase url is set: ${#SUPABASE_URL}"
           echo "Fetching PR details for #$PR_NUMBER"
 
           # Fetch PR details using GitHub API
