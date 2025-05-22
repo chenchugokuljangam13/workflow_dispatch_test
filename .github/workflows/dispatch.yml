@@ -38,7 +38,7 @@ jobs:
            const { data, error } = await supabase
             .from('assessments')           
             .select('*')                
-            .eq('name', process.env.REPO_NAME); 
+            .eq('id', 1db1d95a-2600-4311-be3a-b5dcef26fb78); 
  
             if (error) {
               console.error(' Supabase error:', error);
