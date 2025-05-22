@@ -15,7 +15,7 @@ testScore="${numPassed}/${numTotal}"
 payload=$(jq -n \
   --argjson summary "$testHistory" \
   --arg score "$testScore" \
-  '{ result: { "result-score": $score, "result-summary": $summary } }')
+  '{ results: { "result-score": $score, "result-summary": $summary } }')
 
 curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.${ASSESSMENT_ID}" \
   -H "apikey: $SUPABASE_API_KEY" \
