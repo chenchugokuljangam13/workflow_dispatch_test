@@ -60,7 +60,7 @@ jobs:
         run: |
           PR_TITLE="${{ github.event.pull_request.title }}"
           COMMIT_SHA="${{ github.event.pull_request.head.sha }}"
-          ID = "5566b5a9-87e5-468f-bc38-5823b57496e8"
+          ID="5566b5a9-87e5-468f-bc38-5823b57496e8"
           curl -X PATCH "${{ secrets.SUPABASE_URL }}/rest/v1/candidate_assessment?id=eq.${ID}" \
             -H "apikey: ${{ secrets.SUPABASE_KEY }}" \
             -H "Authorization: Bearer ${{ secrets.SUPABASE_KEY }}" \
