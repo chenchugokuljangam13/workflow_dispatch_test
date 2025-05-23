@@ -67,9 +67,10 @@ jobs:
       - name: Extract PR Info
         id: pr_info
         run: |
-          echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
           echo "COMMIT_ID=${{ github.sha }}" >> $GITHUB_ENV
-
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
+          fi
       - name: Get PR info and send to Supabase
         env:
           SUPABASE_URL: ${{ secrets.SUPABASE_URL }}
@@ -79,8 +80,17 @@ jobs:
         run: |
           echo "SUPABASE_URL is: '${SUPABASE_URL}'"
           ID="5566b5a9-87e5-468f-bc38-5823b57496e8"
-          curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.${ID}" \
-            -H "apikey: $SUPABASE_KEY" \
-            -H "Authorization: Bearer $SUPABASE_KEY" \
-            -H "Content-Type: application/json" \
-            -d "$(jq -n --arg pr_name "$PR_TITLE" --arg sha "$COMMIT_ID" '{pr_name: $pr_name, sha: $sha}')"
+
+          if [ "${{ github.event_name }}" == "pull_request" ]; then
+            curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.${ID}" \
+              -H "apikey: $SUPABASE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_KEY" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n --arg pr_name "$PR_TITLE" --arg sha "$COMMIT_ID" '{pr_name: $pr_name, sha: $sha}')"
+          else
+            curl -X PATCH "$SUPABASE_URL/rest/v1/candidate_assessment?id=eq.${ID}" \
+              -H "apikey: $SUPABASE_KEY" \
+              -H "Authorization: Bearer $SUPABASE_KEY" \
+              -H "Content-Type: application/json" \
+              -d "$(jq -n --arg sha "$COMMIT_ID" '{sha: $sha}')"
+          fi
