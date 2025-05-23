@@ -68,7 +68,7 @@ jobs:
         id: pr_info
         run: |
           echo "PR_TITLE=${{ github.event.pull_request.title }}" >> $GITHUB_ENV
-          echo "COMMIT_ID=${{ github.event.pull_request.head.sha }}" >> $GITHUB_ENV
+          echo "COMMIT_ID=${{ github.sha }}" >> $GITHUB_ENV
 
       - name: Get PR info and send to Supabase
         env:
